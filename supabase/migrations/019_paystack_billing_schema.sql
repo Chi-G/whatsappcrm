@@ -1,0 +1,2 @@
+-- Dummy file to satisfy local migration history for Supabase CLI
+-- (Schema was already applied)

@@ -16,7 +16,7 @@ export const metadata: Metadata = {
     default: "wacrm",
     template: "%s — wacrm",
   },
-  description: "Self-hostable CRM template for WhatsApp.",
+  description: "Self-hostable Fora CRM.",
   robots: {
     index: false,
     follow: false,
@@ -69,6 +69,7 @@ export default function RootLayout({
     <html
       lang="en"
       data-theme={DEFAULT_THEME}
+      suppressHydrationWarning
       className={`${inter.variable} h-full antialiased`}
     >
       <head>

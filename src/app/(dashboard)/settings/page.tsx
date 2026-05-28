@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Settings, MessageSquare, Tag, User, Palette } from 'lucide-react';
+import { Settings, MessageSquare, Tag, User, Palette, CreditCard } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { WhatsAppConfig } from '@/components/settings/whatsapp-config';
 import { TemplateManager } from '@/components/settings/template-manager';
@@ -10,6 +10,7 @@ import { ProfileForm } from '@/components/settings/profile-form';
 import { PasswordForm } from '@/components/settings/password-form';
 import { SessionsCard } from '@/components/settings/sessions-card';
 import { AppearancePanel } from '@/components/settings/appearance-panel';
+import { BillingPanel } from '@/components/settings/billing-panel';
 
 const TAB_VALUES = [
   'profile',
@@ -17,6 +18,7 @@ const TAB_VALUES = [
   'templates',
   'tags',
   'appearance',
+  'billing',
 ] as const;
 type TabValue = (typeof TAB_VALUES)[number];
 
@@ -83,10 +85,17 @@ export default function SettingsPage() {
           </TabsTrigger>
           <TabsTrigger
             value="appearance"
-            className="data-active:bg-slate-800 data-active:text-primary text-slate-400"
+            className="data-[state=active]:bg-slate-800 data-[state=active]:text-primary text-slate-400"
           >
-            <Palette className="size-4" />
+            <Palette className="size-4 mr-2" />
             Appearance
+          </TabsTrigger>
+          <TabsTrigger
+            value="billing"
+            className="data-[state=active]:bg-slate-800 data-[state=active]:text-primary text-slate-400"
+          >
+            <CreditCard className="size-4 mr-2" />
+            Billing
           </TabsTrigger>
         </TabsList>
 
@@ -110,6 +119,10 @@ export default function SettingsPage() {
 
         <TabsContent value="appearance">
           <AppearancePanel />
+        </TabsContent>
+
+        <TabsContent value="billing">
+          <BillingPanel />
         </TabsContent>
       </Tabs>
     </div>

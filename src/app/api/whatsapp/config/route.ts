@@ -46,10 +46,21 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    const { data: tenantUser } = await supabase
+      .from('tenant_users')
+      .select('tenant_id')
+      .eq('user_id', user.id)
+      .limit(1)
+      .single()
+
+    if (!tenantUser) {
+      return NextResponse.json({ error: 'No tenant found for user' }, { status: 403 })
+    }
+
     const { data: config, error: configError } = await supabase
       .from('whatsapp_config')
       .select('phone_number_id, access_token, status')
-      .eq('user_id', user.id)
+      .eq('tenant_id', tenantUser.tenant_id)
       .maybeSingle()
 
     if (configError) {
@@ -147,16 +158,25 @@ export async function POST(request: Request) {
       )
     }
 
-    // Reject if another user has already claimed this phone_number_id.
-    // wacrm is single-tenant-per-WhatsApp-number — letting two users
-    // bind the same number causes the webhook's `.single()` lookup to
-    // throw PGRST116 ("multiple rows"), silently dropping every
-    // inbound message. See issue #136.
+    const { data: tenantUser } = await supabase
+      .from('tenant_users')
+      .select('tenant_id')
+      .eq('user_id', user.id)
+      .limit(1)
+      .single()
+
+    if (!tenantUser) {
+      return NextResponse.json({ error: 'No tenant found for user' }, { status: 403 })
+    }
+
+    const tenantId = tenantUser.tenant_id
+
+    // Reject if another tenant has already claimed this phone_number_id.
     const { data: claimed, error: claimedError } = await supabaseAdmin()
       .from('whatsapp_config')
-      .select('user_id')
+      .select('tenant_id')
       .eq('phone_number_id', phone_number_id)
-      .neq('user_id', user.id)
+      .neq('tenant_id', tenantId)
       .maybeSingle()
 
     if (claimedError) {
@@ -171,7 +191,7 @@ export async function POST(request: Request) {
       return NextResponse.json(
         {
           error:
-            'This WhatsApp phone number is already linked to another account on this instance. Each phone number can only be connected to one wacrm user.',
+            'This WhatsApp phone number is already linked to another business account on this instance. Each phone number can only be connected to one tenant.',
         },
         { status: 409 }
       )
@@ -215,7 +235,7 @@ export async function POST(request: Request) {
     const { data: existing } = await supabase
       .from('whatsapp_config')
       .select('id')
-      .eq('user_id', user.id)
+      .eq('tenant_id', tenantId)
       .maybeSingle()
 
     if (existing) {
@@ -230,7 +250,7 @@ export async function POST(request: Request) {
           connected_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
         })
-        .eq('user_id', user.id)
+        .eq('tenant_id', tenantId)
 
       if (updateError) {
         console.error('Error updating whatsapp_config:', updateError)
@@ -244,6 +264,7 @@ export async function POST(request: Request) {
         .from('whatsapp_config')
         .insert({
           user_id: user.id,
+          tenant_id: tenantId,
           phone_number_id,
           waba_id: waba_id || null,
           access_token: encryptedAccessToken,
@@ -288,10 +309,21 @@ export async function DELETE() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    const { data: tenantUser } = await supabase
+      .from('tenant_users')
+      .select('tenant_id')
+      .eq('user_id', user.id)
+      .limit(1)
+      .single()
+
+    if (!tenantUser) {
+      return NextResponse.json({ error: 'No tenant found for user' }, { status: 403 })
+    }
+
     const { error: deleteError } = await supabase
       .from('whatsapp_config')
       .delete()
-      .eq('user_id', user.id)
+      .eq('tenant_id', tenantUser.tenant_id)
 
     if (deleteError) {
       console.error('Error deleting whatsapp_config:', deleteError)

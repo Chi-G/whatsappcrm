@@ -232,9 +232,9 @@ async function processWebhook(body: { entry?: WhatsAppWebhookEntry[] }) {
         console.error(
           `Multiple configs (${configRows.length}) found for phone_number_id:`,
           phoneNumberId,
-          '— inbound message dropped. Resolve duplicates so each number maps to a single user.',
-          'Owners:',
-          configRows.map((r: { user_id: string }) => r.user_id)
+          '— inbound message dropped. Resolve duplicates so each number maps to a single tenant.',
+          'Tenants:',
+          configRows.map((r: { tenant_id: string }) => r.tenant_id)
         )
         continue
       }
@@ -251,6 +251,7 @@ async function processWebhook(body: { entry?: WhatsAppWebhookEntry[] }) {
           message,
           contact,
           config.user_id,
+          config.tenant_id,
           decryptedAccessToken
         )
       }
@@ -475,6 +476,7 @@ async function processMessage(
   message: WhatsAppMessage,
   contact: { profile: { name: string }; wa_id: string },
   userId: string,
+  tenantId: string,
   accessToken: string
 ) {
   const senderPhone = normalizePhone(message.from)
@@ -483,6 +485,7 @@ async function processMessage(
   // Find or create contact
   const contactOutcome = await findOrCreateContact(
     userId,
+    tenantId,
     senderPhone,
     contactName
   )
@@ -492,6 +495,7 @@ async function processMessage(
   // Find or create conversation
   const conversation = await findOrCreateConversation(
     userId,
+    tenantId,
     contactRecord.id
   )
   if (!conversation) return
@@ -561,6 +565,7 @@ async function processMessage(
 
   const { error: msgError } = await supabaseAdmin().from('messages').insert({
     conversation_id: conversation.id,
+    tenant_id: tenantId,
     sender_type: 'customer',
     content_type: contentType,
     content_text: contentText,
@@ -835,14 +840,15 @@ interface ContactOutcome {
 
 async function findOrCreateContact(
   userId: string,
+  tenantId: string,
   phone: string,
   name: string
 ): Promise<ContactOutcome | null> {
-  // Look up existing contacts for this user
+  // Look up existing contacts for this tenant
   const { data: contacts, error: contactsError } = await supabaseAdmin()
     .from('contacts')
     .select('*')
-    .eq('user_id', userId)
+    .eq('tenant_id', tenantId)
 
   if (contactsError) {
     console.error('Error fetching contacts:', contactsError)
@@ -868,6 +874,7 @@ async function findOrCreateContact(
     .from('contacts')
     .insert({
       user_id: userId,
+      tenant_id: tenantId,
       phone,
       name: name || phone,
     })
@@ -882,12 +889,12 @@ async function findOrCreateContact(
   return { contact: newContact, wasCreated: true }
 }
 
-async function findOrCreateConversation(userId: string, contactId: string) {
+async function findOrCreateConversation(userId: string, tenantId: string, contactId: string) {
   // Look for existing conversation
   const { data: existing, error: findError } = await supabaseAdmin()
     .from('conversations')
     .select('*')
-    .eq('user_id', userId)
+    .eq('tenant_id', tenantId)
     .eq('contact_id', contactId)
     .single()
 
@@ -900,6 +907,7 @@ async function findOrCreateConversation(userId: string, contactId: string) {
     .from('conversations')
     .insert({
       user_id: userId,
+      tenant_id: tenantId,
       contact_id: contactId,
     })
     .select()

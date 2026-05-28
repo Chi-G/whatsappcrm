@@ -93,16 +93,6 @@ If you do send a PR, the usual rules apply:
 Expect a review within a few days. PRs opened without an issue may be
 closed — open the issue first to align.
 
-## If you maintain a public fork
-
-- Rebrand. The "CRM Template for WhatsApp" name, favicon, and
-  `wacrm.tech` URL belong to the upstream project; please swap them
-  for your own before putting your deployment in front of users.
-- Keep the MIT [`LICENSE`](./LICENSE) file — that's how the template's
-  permissions travel with the code. Attribution in a `README` section
-  is appreciated but not required.
-- You are free to re-license additions to your fork however you like.
-
 ## Dev-loop reference
 
 Even if you never send a PR upstream, these are the scripts you'll use

@@ -18,6 +18,7 @@ import {
   LogOut,
   User,
   X,
+  CreditCard,
 } from "lucide-react";
 import {
   Avatar,
@@ -54,6 +55,7 @@ const navItems: NavItem[] = [
 ];
 
 const bottomNavItems = [
+  { href: "/settings?tab=billing", label: "Billing", icon: CreditCard },
   { href: "/settings", label: "Settings", icon: Settings },
 ];
 
@@ -128,7 +130,7 @@ export function Sidebar({ open = false, onClose }: SidebarProps) {
               <MessageSquare className="h-4 w-4" />
             </div>
             <span className="text-sm font-semibold text-white">
-              CRM Template for WhatsApp
+              Fora CRM
             </span>
           </Link>
           <button
@@ -269,6 +271,18 @@ export function Sidebar({ open = false, onClose }: SidebarProps) {
               >
                 <Settings className="size-4" />
                 Settings
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                render={
+                  <Link
+                    href="/settings?tab=billing"
+                    onClick={onClose}
+                    className="text-slate-200 focus:bg-slate-800 focus:text-white"
+                  />
+                }
+              >
+                <CreditCard className="size-4" />
+                Billing
               </DropdownMenuItem>
               <DropdownMenuSeparator className="bg-slate-800" />
               <DropdownMenuItem

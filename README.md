@@ -20,9 +20,9 @@ Built by **Forahia Solutions**, Fora CRM bypasses expensive intermediaries and c
 ### 🌟 Premium SaaS Features (Built by Forahia Solutions)
 - **AI Chatbot Auto-Responder:** 24/7 intelligent agent powered by OpenAI/Gemini that reads inbound queries and instantly replies based on your company's custom knowledge base.
 - **Native E-Commerce Integration:** Instantly fetch and display customer Shopify/WooCommerce order statuses right in the chat sidebar.
-- **In-Chat Payment Links:** Generate and send Stripe payment links directly in the chat to close sales instantly.
+- **In-Chat Payment Links:** Generate and send payment links directly in the chat to close sales instantly.
 - **True Multi-Tenancy:** Securely host hundreds of different businesses on a single server instance with strict data isolation.
-- **Automated Billing & SaaS Paywall:** Fully automated Stripe subscription management with graceful degradation, warning banners, and hard lockouts for past-due accounts.
+- **Automated Billing & SaaS Paywall:** Fully automated Paystack subscription management with graceful degradation, warning banners, and hard lockouts for past-due accounts.
 - **Analytics & Reporting Dashboard:** Bird's-eye view of agent performance, response times, and sales ROI.
 
 ---
@@ -33,7 +33,7 @@ Our platform uses a robust, highly scalable stack:
 - **App:** Next.js 16 (App Router), React 19, TypeScript.
 - **Styling:** Tailwind CSS v4, shadcn/ui.
 - **Data & Auth:** Supabase (Postgres, Auth, RLS).
-- **Integrations:** Meta Cloud API (WhatsApp), Stripe API, OpenAI API.
+- **Integrations:** Meta Cloud API (WhatsApp), Paystack API, OpenAI API.
 - **Deployment:** Vercel / Hostinger / AWS.
 
 ---
@@ -52,7 +52,7 @@ npm install
 
 # 3. Environment Variables
 cp .env.local.example .env.local   
-# Fill in your Supabase, Meta, Stripe, and OpenAI credentials
+# Fill in your Supabase, Meta, Paystack, and OpenAI credentials
 
 # 4. Start Development Server
 npm run dev
