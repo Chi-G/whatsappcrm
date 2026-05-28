@@ -1,102 +1,75 @@
-# wacrm — CRM Template for WhatsApp
+# Fora CRM 
+**A Premium WhatsApp Business CRM — Engineered by Forahia Solutions**
 
-> Self-hostable CRM template for WhatsApp® — shared inbox, contacts,
-> sales pipelines, broadcasts, and no-code automations. Fork it, brand
-> it, host it.
+> The ultimate, fully-managed WhatsApp Business CRM built for high-growth teams. Stop losing leads to slow response times. Fora CRM turns your company's WhatsApp number into a centralized, AI-powered sales and support machine. 
 
-[![Deploy on Hostinger](https://img.shields.io/badge/Deploy_on-Hostinger-673DE6?style=for-the-badge&logo=hostinger&logoColor=white)](https://www.hostinger.com/web-apps-hosting)
+## 🚀 Why Fora CRM?
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-violet.svg)](./LICENSE)
-[![CI](https://github.com/ArnasDon/wacrm/actions/workflows/ci.yml/badge.svg)](https://github.com/ArnasDon/wacrm/actions/workflows/ci.yml)
-[![Next.js 16](https://img.shields.io/badge/Next.js-16-black?logo=nextdotjs)](https://nextjs.org)
-[![Supabase](https://img.shields.io/badge/Supabase-Postgres%20%2B%20Auth-3ecf8e?logo=supabase)](https://supabase.com)
-[![Stars](https://img.shields.io/github/stars/ArnasDon/wacrm?style=social)](https://github.com/ArnasDon/wacrm/stargazers)
+Built by **Forahia Solutions**, Fora CRM bypasses expensive intermediaries and connects your team directly to the official **Meta WhatsApp Cloud API**. It is designed to scale with your business, offering a true Multi-Tenant SaaS architecture, automated billing, and powerful AI integrations.
 
-The marketing site and self-host docs live in a separate repo:
-[ArnasDon/wacrm-site](https://github.com/ArnasDon/wacrm-site)
-([wacrm.tech](https://wacrm.tech)). This repo is the product —
-clone or fork it to run your own CRM.
+## ✨ Features
 
-## What you get out of the box
+### The Universal Core
+- **Multi-Agent Shared Inbox:** Multiple agents working from a single official WhatsApp Business number. No more fighting over one phone.
+- **Smart Assignment & Routing:** Assign conversations to specific agents to prevent collision.
+- **Sales Pipelines (Kanban):** Track deals visually from `New Lead` to `Closed Won`.
+- **Broadcast Campaigns:** Send Meta-approved template messages to thousands of contacts with delivery and read tracking.
+- **No-Code Automations:** Visually build triggers for inbound messages, keywords, or schedules.
+- **Internal Notes:** Agents can silently tag each other and leave sticky notes on chats without the customer seeing.
 
-- **Shared inbox** on the official WhatsApp Business API — multiple
-  agents working one number, per-conversation assignment, status, and
-  notes.
-- **Contacts + tags + custom fields**, CSV import, deduplication.
-- **Sales pipelines** (Kanban) with deals linked to conversations.
-- **Broadcasts** with Meta-approved templates, delivery + read
-  tracking, per-recipient variable substitution.
-- **No-code automations** — triggers on inbound messages, new
-  contacts, keywords, or schedule; conditional branches, waits,
-  tags, webhooks. Visual builder.
-- **Real-time dashboard** — response times, daily volume, pipeline
-  value, cross-module activity feed.
-- **Account management** — email, password, avatar, global sign-out.
+### 🌟 Premium SaaS Features (Built by Forahia Solutions)
+- **AI Chatbot Auto-Responder:** 24/7 intelligent agent powered by OpenAI/Gemini that reads inbound queries and instantly replies based on your company's custom knowledge base.
+- **Native E-Commerce Integration:** Instantly fetch and display customer Shopify/WooCommerce order statuses right in the chat sidebar.
+- **In-Chat Payment Links:** Generate and send Stripe payment links directly in the chat to close sales instantly.
+- **True Multi-Tenancy:** Securely host hundreds of different businesses on a single server instance with strict data isolation.
+- **Automated Billing & SaaS Paywall:** Fully automated Stripe subscription management with graceful degradation, warning banners, and hard lockouts for past-due accounts.
+- **Analytics & Reporting Dashboard:** Bird's-eye view of agent performance, response times, and sales ROI.
 
-## Why fork this?
+---
 
-This is a **template**, not a product. Forking means you get:
+## 🛠 Tech Stack
 
-- **Full ownership** — your code, your Supabase project, your domain,
-  your data. No SaaS lock-in, no seat pricing, no trust dance.
-- **Full customisation** — add the fields your team needs, remove the
-  modules you don't, redesign anything. The stack is boring on
-  purpose (Next.js + Supabase + Tailwind) so the learning curve is
-  short.
-- **Zero ops to start** — Hostinger Managed Node.js deploys a fork in
-  a few clicks. No Docker, no Kubernetes, no infra team needed.
-- **Real security primitives** — token encryption (AES-256-GCM), RLS
-  on every table, HMAC-verified webhooks, CSP, rate limiting, CI
-  typecheck/build on every PR.
+Our platform uses a robust, highly scalable stack:
+- **App:** Next.js 16 (App Router), React 19, TypeScript.
+- **Styling:** Tailwind CSS v4, shadcn/ui.
+- **Data & Auth:** Supabase (Postgres, Auth, RLS).
+- **Integrations:** Meta Cloud API (WhatsApp), Stripe API, OpenAI API.
+- **Deployment:** Vercel / Hostinger / AWS.
 
-Not a framework. Not an SDK. A concrete, working CRM you can stand up
-in an afternoon and make yours.
+---
 
-## Quick start
+## 💻 Local Development Setup
+
+*Note: Forahia Solutions Engineers Only*
 
 ```bash
-# Fork on GitHub first: https://github.com/ArnasDon/wacrm → Fork
-git clone https://github.com/<your-username>/wacrm.git
-cd wacrm
+# 1. Clone the repository
+git clone https://github.com/ForahiaSolutions/forachat-crm.git
+cd forachat-crm
+
+# 2. Install dependencies
 npm install
-cp .env.local.example .env.local   # fill in Supabase + Meta creds
+
+# 3. Environment Variables
+cp .env.local.example .env.local   
+# Fill in your Supabase, Meta, Stripe, and OpenAI credentials
+
+# 4. Start Development Server
 npm run dev
 ```
 
-Open <http://localhost:3000>. You'll be redirected to `/login` (or
-`/dashboard` if already signed in).
+Open <http://localhost:3000>. You'll be redirected to `/login`.
 
-## Documentation
+### Webhook Configuration (Local)
+To receive inbound WhatsApp messages locally, expose your server using ngrok:
+```bash
+ngrok http 3000
+```
+Update your Meta App Webhook configuration with the generated ngrok URL.
 
-Full self-host documentation — Supabase migrations, WhatsApp Business
-API config, and production deploy — lives at
-**[wacrm.tech/docs](https://wacrm.tech/docs)**
-(source: [ArnasDon/wacrm-site](https://github.com/ArnasDon/wacrm-site)).
+---
 
-Key pages:
-- [Getting started](https://wacrm.tech/docs/getting-started)
-- [Supabase setup](https://wacrm.tech/docs/supabase-setup)
-- [WhatsApp setup](https://wacrm.tech/docs/whatsapp-setup)
-- [Environment variables](https://wacrm.tech/docs/environment-variables)
-- [Deploy on Hostinger](https://wacrm.tech/docs/deployment-hostinger)
-- [Architecture](https://wacrm.tech/docs/architecture)
-- [Troubleshooting](https://wacrm.tech/docs/troubleshooting)
+## 📄 License & Ownership
 
-## Stack
-
-- **App** — Next.js 16 (App Router), React 19, TypeScript, Tailwind v4.
-- **Data** — Supabase (Postgres + Auth + Storage + RLS).
-- **WhatsApp** — Meta Cloud API (official WhatsApp Business API).
-
-## Contributing
-
-This is a template, not a collaborative product — the expected flow is
-fork → customise → deploy, **not** upstream contribution. Bug reports
-and security issues are welcome; feature PRs often belong in your fork
-rather than here. Details in
-[`CONTRIBUTING.md`](./CONTRIBUTING.md) and
-[`.github/SECURITY.md`](./.github/SECURITY.md).
-
-## License
-
-[MIT](./LICENSE). Fork it, brand it, host it.
+Copyright © 2026 **Forahia Solutions**. All Rights Reserved. 
+This software is a proprietary product of Forahia Solutions. Unauthorized copying, distribution, or modification is strictly prohibited.
