@@ -73,3 +73,5 @@ Update your Meta App Webhook configuration with the generated ngrok URL.
 
 Copyright © 2026 **Forahia Solutions**. All Rights Reserved. 
 This software is a proprietary product of Forahia Solutions. Unauthorized copying, distribution, or modification is strictly prohibited.
+
+*Acknowledgment: This project was originally built upon the open-source wacrm template (MIT License). This specific version has been heavily modified, extended with premium SaaS features, and is now proprietary to Forahia Solutions.*
