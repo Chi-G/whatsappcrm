@@ -10,6 +10,7 @@ import { usePathname } from "next/navigation";
 export function PaywallGuard({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [isLocked, setIsLocked] = useState(false);
+  const [lockReason, setLockReason] = useState<"new" | "past_due" | null>(null);
   const [isSubscribing, setIsSubscribing] = useState(false);
   const supabase = createClient();
   const pathname = usePathname();
@@ -35,7 +36,15 @@ export function PaywallGuard({ children }: { children: React.ReactNode }) {
           .eq("id", tu.tenant_id)
           .single();
 
-        if (t?.subscription_status === "past_due" || t?.subscription_status === "canceled") {
+        const status = t?.subscription_status;
+        
+        // Strict Paywall Logic:
+        if (status === "past_due" || status === "canceled") {
+          setLockReason("past_due");
+          setIsLocked(true);
+        } else if (status !== "active" && status !== "trialing") {
+          // This catches new users (null, undefined, "inactive", "incomplete")
+          setLockReason("new");
           setIsLocked(true);
         }
       }
@@ -83,28 +92,30 @@ export function PaywallGuard({ children }: { children: React.ReactNode }) {
   if (isLocked) {
     return (
       <div className="flex h-screen items-center justify-center bg-slate-950 p-4">
-        <div className="max-w-md w-full bg-slate-900 border border-red-500/20 rounded-xl p-8 text-center space-y-6">
-          <div className="w-16 h-16 bg-red-500/10 rounded-full flex items-center justify-center mx-auto">
-            <ShieldAlert className="w-8 h-8 text-red-500" />
+        <div className="max-w-md w-full bg-slate-900 border border-slate-800 rounded-xl p-8 text-center space-y-6 shadow-2xl">
+          <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto">
+            <CreditCard className="w-8 h-8 text-primary" />
           </div>
           <div>
-            <h2 className="text-xl font-bold text-white mb-2">Subscription Past Due</h2>
+            <h2 className="text-xl font-bold text-white mb-2">
+              {lockReason === "past_due" ? "Subscription Past Due" : "Subscription Required"}
+            </h2>
             <p className="text-slate-400 text-sm">
-              Your dashboard has been temporarily locked due to a failed payment or canceled subscription. 
-              Please update your payment method to restore access. 
-              Don't worry, your customer data and inbound messages are still safely secured!
+              {lockReason === "past_due" 
+                ? "Your dashboard has been temporarily locked due to a failed payment. Please update your payment method to restore access. Don't worry, your customer data is safe!"
+                : "Welcome to Fora CRM! To access your dashboard, connect your WhatsApp, and start building pipelines, please complete your subscription setup."}
             </p>
           </div>
           <Button
             onClick={handleSubscribe}
             disabled={isSubscribing}
-            className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
+            className="w-full bg-primary hover:bg-primary-hover text-white shadow-[0_0_15px_rgba(var(--primary),0.3)]"
           >
             <CreditCard className="w-4 h-4 mr-2" />
-            {isSubscribing ? "Loading..." : "Update Payment Method"}
+            {isSubscribing ? "Redirecting to checkout..." : lockReason === "past_due" ? "Update Payment Method" : "Subscribe Now"}
           </Button>
           <div className="text-xs text-slate-500">
-            Or contact support if you believe this is an error.
+            Secure checkout powered by Paystack.
           </div>
         </div>
       </div>
