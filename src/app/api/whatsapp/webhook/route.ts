@@ -252,7 +252,8 @@ async function processWebhook(body: { entry?: WhatsAppWebhookEntry[] }) {
           contact,
           config.user_id,
           config.tenant_id,
-          decryptedAccessToken
+          decryptedAccessToken,
+          config.phone_number_id
         )
       }
     }
@@ -477,7 +478,8 @@ async function processMessage(
   contact: { profile: { name: string }; wa_id: string },
   userId: string,
   tenantId: string,
-  accessToken: string
+  accessToken: string,
+  phoneNumberId: string
 ) {
   const senderPhone = normalizePhone(message.from)
   const contactName = contact.profile.name
@@ -680,6 +682,64 @@ async function processMessage(
         conversation_id: conversation.id,
       },
     }).catch((err) => console.error('[automations] dispatch failed:', err))
+  }
+
+  // ============================================================
+  // AI Auto-Responder (OpenAI)
+  // ============================================================
+  // Only trigger if:
+  // 1. The flow didn't consume the message (it wasn't a bot menu interaction)
+  // 2. The conversation is unassigned (assigned_agent_id is null)
+  if (!flowConsumed && !conversation.assigned_agent_id) {
+    try {
+      // 1. Fetch recent message history for context
+      const { data: history } = await supabaseAdmin()
+        .from('messages')
+        .select('*')
+        .eq('conversation_id', conversation.id)
+        .order('created_at', { ascending: false })
+        .limit(10)
+
+      if (history && history.length > 0) {
+        // We import dynamically to avoid slowing down the webhook if not used
+        const { generateBotResponse } = await import('@/lib/ai/openai')
+        const aiReply = await generateBotResponse(history as any)
+
+        if (aiReply) {
+          // 2. Send the AI reply via Meta API
+          const { sendTextMessage } = await import('@/lib/whatsapp/meta-api')
+          const sendResult = await sendTextMessage({
+            phoneNumberId: phoneNumberId,
+            accessToken: accessToken,
+            to: senderPhone,
+            text: aiReply,
+          })
+
+          // 3. Save the AI reply to the database
+          await supabaseAdmin().from('messages').insert({
+            conversation_id: conversation.id,
+            tenant_id: tenantId,
+            sender_type: 'bot',
+            content_type: 'text',
+            content_text: aiReply,
+            message_id: sendResult.messageId,
+            status: 'sent',
+          })
+
+          // 4. Update conversation last message
+          await supabaseAdmin()
+            .from('conversations')
+            .update({
+              last_message_text: aiReply,
+              last_message_at: new Date().toISOString(),
+              updated_at: new Date().toISOString(),
+            })
+            .eq('id', conversation.id)
+        }
+      }
+    } catch (err) {
+      console.error('[ai-auto-responder] failed:', err)
+    }
   }
 }
 

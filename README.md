@@ -44,7 +44,7 @@ Our platform uses a robust, highly scalable stack:
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/ForahiaSolutions/forachat-crm.git
+git clone https://github.com/ChiG/forachat-crm.git
 cd forachat-crm
 
 # 2. Install dependencies
@@ -52,7 +52,12 @@ npm install
 
 # 3. Environment Variables
 cp .env.local.example .env.local   
-# Fill in your Supabase, Meta, Paystack, and OpenAI credentials
+# Fill in your .env.local with the following configurations:
+# - Supabase URL and Keys (Anon & Service Role)
+# - Meta Webhook Secret & WhatsApp Encryption Key
+# - Paystack Keys & Subscription Plan Code
+# - SMTP/Mailtrap Email Credentials
+# - OpenAI API Key for the AI Auto-Responder
 
 # 4. Start Development Server
 npm run dev

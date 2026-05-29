@@ -174,12 +174,20 @@ export default function SignupPage() {
               />
             </div>
 
-            <Button
+            {/* <Button
               type="submit"
               disabled={loading}
               className="mt-2 h-10 w-full bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
             >
               {loading ? "Creating account..." : "Create account"}
+            </Button> */}
+
+            <Button
+              type="button"
+              disabled={true}
+              className="mt-2 h-10 w-full bg-slate-800 text-slate-500 cursor-not-allowed"
+            >
+              Registration Currently Closed
             </Button>
           </form>
 

@@ -25,9 +25,9 @@ export function Navbar() {
           <Link href="/login" className={buttonVariants({ variant: "ghost", className: "hidden sm:inline-flex" })}>
             Log in
           </Link>
-          <Link href="/signup" className={buttonVariants({ className: "bg-primary hover:bg-primary-hover text-white shadow-[0_0_15px_rgba(var(--primary),0.5)]" })}>
+          {/* <Link href="/signup" className={buttonVariants({ className: "bg-primary hover:bg-primary-hover text-white shadow-[0_0_15px_rgba(var(--primary),0.5)]" })}>
             Get Started <ArrowRight className="ml-2 h-4 w-4" />
-          </Link>
+          </Link> */}
         </div>
       </div>
     </header>
