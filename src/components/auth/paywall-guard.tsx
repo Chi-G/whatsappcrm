@@ -12,6 +12,8 @@ export function PaywallGuard({ children }: { children: React.ReactNode }) {
   const [isLocked, setIsLocked] = useState(false);
   const [lockReason, setLockReason] = useState<"new" | "past_due" | null>(null);
   const [isSubscribing, setIsSubscribing] = useState(false);
+  const [currency, setCurrency] = useState<"NGN" | "USD" | "GBP">("NGN");
+  const [rates, setRates] = useState({ usd: 1500, gbp: 1900 });
   const supabase = createClient();
   const pathname = usePathname();
 
@@ -48,6 +50,12 @@ export function PaywallGuard({ children }: { children: React.ReactNode }) {
           setIsLocked(true);
         }
       }
+      
+      const { data: settings } = await supabase.from("global_settings").select("*").single();
+      if (settings) {
+        setRates({ usd: settings.usd_to_ngn_rate, gbp: settings.gbp_to_ngn_rate });
+      }
+
       setLoading(false);
     }
     
@@ -66,16 +74,16 @@ export function PaywallGuard({ children }: { children: React.ReactNode }) {
       const res = await fetch("/api/paystack/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ planCode: process.env.NEXT_PUBLIC_PAYSTACK_PLAN_CODE || "PLN_dummy" }),
+        body: JSON.stringify({ currency }),
       });
       const data = await res.json();
       if (data.url) {
         window.location.href = data.url;
-      } else {
-        toast.error("Failed to initiate checkout");
+        return;
       }
     } catch (err) {
-      toast.error("Failed to initiate checkout");
+      console.error(err);
+      toast.error("An error occurred during checkout.");
     } finally {
       setIsSubscribing(false);
     }
@@ -106,6 +114,32 @@ export function PaywallGuard({ children }: { children: React.ReactNode }) {
                 : "Welcome to Fora CRM! To access your dashboard, connect your WhatsApp, and start building pipelines, please complete your subscription setup."}
             </p>
           </div>
+
+          <div className="flex justify-center space-x-2 mt-4">
+            {(["NGN", "USD", "GBP"] as const).map(c => (
+              <button
+                key={c}
+                onClick={() => setCurrency(c)}
+                className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
+                  currency === c 
+                    ? "bg-primary text-white" 
+                    : "bg-slate-800 text-slate-400 hover:bg-slate-700"
+                }`}
+              >
+                {c === "NGN" ? "🇳🇬 NGN" : c === "USD" ? "🇺🇸 USD" : "🇬🇧 GBP"}
+              </button>
+            ))}
+          </div>
+
+          <div className="text-center py-2">
+            <span className="text-4xl font-bold text-white">
+              {currency === "NGN" && "₦30,000"}
+              {currency === "USD" && `$${Math.round(40000 / rates.usd)}`}
+              {currency === "GBP" && `£${Math.round(42000 / rates.gbp)}`}
+            </span>
+            <span className="text-slate-400 text-sm"> / month</span>
+          </div>
+
           <Button
             onClick={handleSubscribe}
             disabled={isSubscribing}

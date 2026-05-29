@@ -14,10 +14,15 @@ export async function POST(req: Request) {
     }
 
     const body = await req.json();
-    const { planCode } = body;
+    const { currency = "NGN" } = body;
 
-    if (!planCode) {
-      return NextResponse.json({ error: "planCode is required" }, { status: 400 });
+    const planCode = 
+      currency === "USD" ? process.env.NEXT_PUBLIC_PAYSTACK_PLAN_CODE_USD :
+      currency === "GBP" ? process.env.NEXT_PUBLIC_PAYSTACK_PLAN_CODE_GBP :
+      process.env.NEXT_PUBLIC_PAYSTACK_PLAN_CODE_NGN;
+
+    if (!planCode || planCode.includes("dummy")) {
+      return NextResponse.json({ error: "Server configuration error: Valid Plan codes missing from env." }, { status: 500 });
     }
 
     // Get the user's primary tenant
@@ -36,7 +41,11 @@ export async function POST(req: Request) {
     const tenantData: any = tenantUser.tenants;
 
     // If the user already has an active subscription, return the Paystack Manage Link instead
-    if (tenantData?.subscription_status === "active" && tenantData?.paystack_subscription_code) {
+    if (tenantData?.subscription_status === "active") {
+      if (!tenantData?.paystack_subscription_code) {
+        return NextResponse.json({ error: "Active subscription found, but no subscription code is saved. Please contact support." }, { status: 400 });
+      }
+
       const manageRes = await fetch(`https://api.paystack.co/subscription/${tenantData.paystack_subscription_code}/manage/link`, {
         method: "GET",
         headers: {
@@ -47,6 +56,9 @@ export async function POST(req: Request) {
       const manageData = await manageRes.json();
       if (manageRes.ok && manageData.status) {
         return NextResponse.json({ url: manageData.data.link });
+      } else {
+        console.error("Paystack Manage Link Error:", manageData);
+        return NextResponse.json({ error: "Could not generate subscription management link. Please try again later." }, { status: 500 });
       }
     }
     // We do not strictly need to create a Paystack customer ahead of time like Stripe, 
@@ -57,7 +69,11 @@ export async function POST(req: Request) {
     const origin = headersList.get("origin") || process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
     const returnUrl = `${origin}/settings?tab=billing`;
 
-    const fallbackAmount = parseInt(process.env.NEXT_PUBLIC_SUBSCRIPTION_AMOUNT || "30000", 10);
+    const fallbackAmount = 
+      planCode === process.env.NEXT_PUBLIC_PAYSTACK_PLAN_CODE_USD ? 40000 :
+      planCode === process.env.NEXT_PUBLIC_PAYSTACK_PLAN_CODE_GBP ? 42000 :
+      parseInt(process.env.NEXT_PUBLIC_SUBSCRIPTION_AMOUNT || "30000", 10);
+      
     const amountInKobo = fallbackAmount * 100; // Paystack expects amount in Kobo
 
     const payload: any = {
@@ -70,7 +86,7 @@ export async function POST(req: Request) {
       }
     };
 
-    // If a valid plan code was sent, attach it to automatically create a subscription
+    // If a valid plan code was sent, attach it
     if (planCode && !planCode.includes("dummy")) {
       payload.plan = planCode;
     }

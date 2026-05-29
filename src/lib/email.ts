@@ -10,6 +10,10 @@ const transport = nodemailer.createTransport({
 });
 
 export async function sendSubscriptionSuccessEmail(toEmail: string, planName: string, amount: string) {
+  const now = new Date();
+  const dateStr = now.toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
+  const timeStr = now.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
+
   const htmlContent = `
     <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden;">
       <div style="background-color: #0f172a; padding: 24px; text-align: center;">
@@ -26,6 +30,8 @@ export async function sendSubscriptionSuccessEmail(toEmail: string, planName: st
           <ul style="margin: 0; padding-left: 20px;">
             <li><strong>Plan:</strong> ${planName}</li>
             <li><strong>Amount:</strong> ${amount} / month</li>
+            <li><strong>Date:</strong> ${dateStr}</li>
+            <li><strong>Time:</strong> ${timeStr}</li>
             <li><strong>Status:</strong> Active</li>
           </ul>
         </div>

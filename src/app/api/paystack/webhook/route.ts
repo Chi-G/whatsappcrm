@@ -33,6 +33,7 @@ export async function POST(req: Request) {
 
   try {
     const event = JSON.parse(bodyText);
+    console.log(`\n[WEBHOOK RECEIVED] Paystack event: ${event.event}`);
 
     // ============================================================
     // IDEMPOTENCY CHECK
@@ -46,7 +47,7 @@ export async function POST(req: Request) {
     if (idempotencyError && idempotencyError.code === "23505") {
       // 23505 is PostgreSQL's unique_violation error code
       console.log(`[Idempotency] Event already processed, skipping: ${event.event}`);
-      return NextResponse.json({ received: true }); // Acknowledge safely
+      return NextResponse.json({ received: true });
     } else if (idempotencyError) {
       console.error("Idempotency db error:", idempotencyError);
       throw idempotencyError;
@@ -55,8 +56,11 @@ export async function POST(req: Request) {
     switch (event.event) {
       case "subscription.create": {
         const { customer, subscription_code, plan, next_payment_date } = event.data;
-        // In subscription.create, custom metadata from checkout isn't always deeply nested the same way,
-        // but we can query by customer code or we rely on charge.success to set the tenant_id first.
+        
+        // Race condition fix: Paystack sometimes sends subscription.create BEFORE charge.success.
+        // We wait 3 seconds to ensure charge.success has saved the customer_code to the DB.
+        await new Promise(resolve => setTimeout(resolve, 6000));
+
         // Usually, charge.success fires right before subscription.create on a new subscription.
         const { data: tenant } = await supabaseAdmin
           .from("tenants")

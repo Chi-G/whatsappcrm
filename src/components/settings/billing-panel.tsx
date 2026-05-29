@@ -12,6 +12,8 @@ export function BillingPanel() {
   const [loading, setLoading] = useState(false);
   const [tenant, setTenant] = useState<any>(null);
   const [planDetails, setPlanDetails] = useState<{ amount: number, interval: string, currency: string } | null>(null);
+  const [currency, setCurrency] = useState<"NGN" | "USD" | "GBP">("NGN");
+  const [rates, setRates] = useState({ usd: 1500, gbp: 1900 });
   const supabase = createClient();
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -40,7 +42,7 @@ export function BillingPanel() {
       if (tu) {
         const { data: t } = await supabase
           .from("tenants")
-          .select("*")
+          .select("id, name, subscription_status")
           .eq("id", tu.tenant_id)
           .single();
         setTenant(t);
@@ -57,6 +59,11 @@ export function BillingPanel() {
       } catch (err) {
         console.error("Failed to fetch plan details");
       }
+      
+      const { data: settings } = await supabase.from("global_settings").select("*").single();
+      if (settings) {
+        setRates({ usd: settings.usd_to_ngn_rate, gbp: settings.gbp_to_ngn_rate });
+      }
     }
     
     loadTenant();
@@ -71,18 +78,17 @@ export function BillingPanel() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          planCode: process.env.NEXT_PUBLIC_PAYSTACK_PLAN_CODE || "PLN_dummy",
-        }),
+        body: JSON.stringify({ currency }),
       });
       const data = await res.json();
       if (data.url) {
         window.location.href = data.url;
+        return; 
       } else {
-        toast.error("Failed to initiate checkout");
+        toast.error(data.error || "Failed to initialize checkout");
       }
     } catch (err) {
-      toast.error("Failed to initiate checkout");
+      toast.error("Failed to initialize checkout");
     } finally {
       setLoading(false);
     }
@@ -135,8 +141,32 @@ export function BillingPanel() {
             </div>
             
             <div className="text-center md:text-right">
+              {!isActive && (
+                <div className="flex justify-end space-x-2 mb-2">
+                  {(["NGN", "USD", "GBP"] as const).map(c => (
+                    <button
+                      key={c}
+                      onClick={() => setCurrency(c)}
+                      className={`px-2 py-0.5 rounded text-xs font-medium transition-colors ${
+                        currency === c 
+                          ? "bg-primary text-white" 
+                          : "bg-slate-800 text-slate-400 hover:bg-slate-700"
+                      }`}
+                    >
+                      {c}
+                    </button>
+                  ))}
+                </div>
+              )}
+              
               <div className="text-3xl font-bold text-white">
-                {planDetails ? (
+                {!isActive ? (
+                  <>
+                    {currency === "NGN" && "₦30,000"}
+                    {currency === "USD" && `$${Math.round(40000 / rates.usd)}`}
+                    {currency === "GBP" && `£${Math.round(42000 / rates.gbp)}`}
+                  </>
+                ) : planDetails ? (
                   planDetails.currency === 'NGN' 
                     ? `₦${planDetails.amount.toLocaleString()}` 
                     : `${planDetails.currency} ${planDetails.amount.toLocaleString()}`
