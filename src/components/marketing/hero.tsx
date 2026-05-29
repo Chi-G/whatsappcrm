@@ -32,15 +32,15 @@ export function Hero() {
               <Play className="mr-2 h-5 w-5 text-primary" /> Book a demo
             </button>
           </div>
-          <div className="mt-8 flex items-center justify-center lg:justify-start gap-4 text-sm text-muted-foreground">
-            <div className="flex items-center gap-1">
-              <div className="h-2 w-2 rounded-full bg-green-500"></div> No credit card required
+          <div className="mt-8 flex flex-wrap items-center justify-center lg:justify-start gap-x-5 gap-y-2 text-[11px] sm:text-xs font-normal text-muted-foreground tracking-wide">
+            <div className="flex items-center gap-1.5">
+              <div className="h-1.5 w-1.5 rounded-full bg-emerald-500/80 shadow-[0_0_5px_rgba(16,185,129,0.4)]"></div> No credit card required
             </div>
-            <div className="flex items-center gap-1">
-              <div className="h-2 w-2 rounded-full bg-green-500"></div> Open source
+            <div className="flex items-center gap-1.5">
+              <div className="h-1.5 w-1.5 rounded-full bg-emerald-500/80 shadow-[0_0_5px_rgba(16,185,129,0.4)]"></div> Open source
             </div>
-            <div className="flex items-center gap-1">
-              <div className="h-2 w-2 rounded-full bg-green-500"></div> Self-hostable
+            <div className="flex items-center gap-1.5">
+              <div className="h-1.5 w-1.5 rounded-full bg-emerald-500/80 shadow-[0_0_5px_rgba(16,185,129,0.4)]"></div> Self-hostable
             </div>
           </div>
         </div>
@@ -117,7 +117,7 @@ export function Hero() {
                   </div>
                 </div>
                 
-                <div className="flex-1 p-4 overflow-y-auto space-y-6 relative flex flex-col">
+                <div className="flex-1 p-2 sm:p-4 overflow-hidden space-y-4 sm:space-y-6 relative flex flex-col">
                   {/* Decorative blur */}
                   <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-primary/10 blur-3xl rounded-full"></div>
                   
